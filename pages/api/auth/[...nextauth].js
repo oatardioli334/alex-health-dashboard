@@ -14,26 +14,19 @@ export const authOptions = {
         },
       },
       token: {
-        url: "https://api.ouraring.com/oauth/token",
+        url: "https://moi.ouraring.com/oauth/v2/oauth-token",
         async request({ params, provider }) {
-          // Oura requires HTTP Basic Auth for client credentials
-          const credentials = Buffer.from(
-            `${provider.clientId}:${provider.clientSecret}`
-          ).toString("base64")
-
-          const res = await fetch("https://api.ouraring.com/oauth/token", {
+          const res = await fetch("https://moi.ouraring.com/oauth/v2/oauth-token", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Basic ${credentials}`,
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
               grant_type: "authorization_code",
               code: params.code,
               redirect_uri: provider.callbackUrl,
+              client_id: provider.clientId,
+              client_secret: provider.clientSecret,
             }).toString(),
           })
-
           const tokens = await res.json()
           console.log("[OURA TOKEN]", res.status, JSON.stringify(tokens))
           if (!res.ok) throw new Error(`Token exchange failed ${res.status}: ${JSON.stringify(tokens)}`)
