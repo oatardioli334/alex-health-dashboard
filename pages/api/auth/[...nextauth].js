@@ -14,10 +14,21 @@ export const authOptions = {
         },
       },
       token: "https://api.ouraring.com/oauth/token",
-      userinfo: "https://api.ouraring.com/v2/usercollection/personal_info",
+      userinfo: {
+        url: "https://api.ouraring.com/v2/usercollection/personal_info",
+        async request({ tokens }) {
+          const res = await fetch("https://api.ouraring.com/v2/usercollection/personal_info", {
+            headers: { Authorization: `Bearer ${tokens.access_token}` },
+          })
+          const data = await res.json()
+          console.log("[OURA USERINFO]", res.status, JSON.stringify(data))
+          if (!res.ok) throw new Error(`Oura userinfo ${res.status}: ${JSON.stringify(data)}`)
+          return data
+        },
+      },
       clientId: process.env.OURA_CLIENT_ID,
       clientSecret: process.env.OURA_CLIENT_SECRET,
-      checks: ["state"],
+      checks: [],
       profile(profile) {
         return {
           id: profile.id || "oura_user",
@@ -40,21 +51,13 @@ export const authOptions = {
       return session
     },
   },
-  pages: {
-    signIn: "/",
-  },
+  pages: { signIn: "/" },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true,
   logger: {
-    error(code, metadata) {
-      console.error("[NEXTAUTH ERROR]", code, JSON.stringify(metadata))
-    },
-    warn(code) {
-      console.warn("[NEXTAUTH WARN]", code)
-    },
-    debug(code, metadata) {
-      console.log("[NEXTAUTH DEBUG]", code, JSON.stringify(metadata))
-    },
+    error(code, metadata) { console.error("[NEXTAUTH ERROR]", code, JSON.stringify(metadata)) },
+    warn(code) { console.warn("[NEXTAUTH WARN]", code) },
+    debug(code, metadata) { console.log("[NEXTAUTH DEBUG]", code, JSON.stringify(metadata)) },
   },
 }
 
