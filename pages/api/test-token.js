@@ -1,14 +1,16 @@
-// Diagnostic: tests Oura token endpoint with body creds vs Basic Auth
-// body_creds → invalid_request = Oura rejects body credentials
-// basic_auth → invalid_grant = Oura accepts Basic Auth but dummy code is wrong (GOOD)
+// Diagnostic: tests Oura token exchange with correct endpoint + dummy code
+// ✅ = invalid_grant → correct URL + valid credentials, just dummy code rejected
+// ❌ = invalid_request → still wrong URL or client credentials bad
 export default async function handler(req, res) {
   const redirectUri = process.env.NEXTAUTH_URL + "/api/auth/callback/oura"
   const clientId = process.env.OURA_CLIENT_ID
   const clientSecret = process.env.OURA_CLIENT_SECRET
   const dummyCode = "diagnostic_dummy_code_12345"
 
-  // Test 1: body credentials (current NextAuth default)
-  const bodyRes = await fetch("https://api.ouraring.com/oauth/token", {
+  // Correct token endpoint from Oura's OIDC discovery document
+  const tokenUrl = "https://moi.ouraring.com/oauth/v2/oauth-token"
+
+  const bodyRes = await fetch(tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -21,30 +23,17 @@ export default async function handler(req, res) {
   })
   const bodyData = await bodyRes.json()
 
-  // Test 2: HTTP Basic Auth (what Oura actually requires)
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
-  const basicRes = await fetch("https://api.ouraring.com/oauth/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${credentials}`,
-    },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      code: dummyCode,
-      redirect_uri: redirectUri,
-    }).toString(),
-  })
-  const basicData = await basicRes.json()
-
   return res.status(200).json({
+    tokenUrl,
     redirectUri,
-    bodyCreds: { status: bodyRes.status, error: bodyData.error, description: bodyData.error_description },
-    basicAuth: { status: basicRes.status, error: basicData.error, description: basicData.error_description },
-    verdict: basicRes.status === 400 && basicData.error === "invalid_grant"
-      ? "✅ Basic Auth works — invalid_grant means credentials are correct, code is just dummy"
-      : basicRes.status === 400 && basicData.error === "invalid_request"
-      ? "❌ Both methods rejected — check client_id/secret in Vercel env vars"
-      : "See raw responses above",
+    result: { status: bodyRes.status, error: bodyData.error, description: bodyData.error_description },
+    verdict:
+      bodyData.error === "invalid_grant"
+        ? "✅ Token endpoint correct — credentials valid, dummy code rejected as expected"
+        : bodyData.error === "invalid_request"
+        ? "❌ Still invalid_request — redirect_uri mismatch or client credentials wrong"
+        : bodyData.error === "invalid_client"
+        ? "❌ invalid_client — OURA_CLIENT_ID or OURA_CLIENT_SECRET is wrong in Vercel env vars"
+        : JSON.stringify(bodyData),
   })
 }
