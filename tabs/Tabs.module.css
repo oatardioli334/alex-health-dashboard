@@ -1,0 +1,90 @@
+.metricsStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.metricTileSimple {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 10px;
+}
+.metricLabel { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.metricValue { font-size: 22px; font-weight: 300; font-family: var(--mono); line-height: 1; }
+.up { color: var(--green); }
+.down { color: var(--red); }
+.flat { color: var(--text3); }
+
+.sleepArc { display: flex; flex-direction: column; gap: 8px; }
+.sleepItem { display: flex; align-items: center; gap: 8px; }
+.sleepDot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.sleepLbl { font-size: 12px; color: var(--text2); flex: 1; }
+.sleepVal { font-size: 12px; font-family: var(--mono); font-weight: 500; }
+
+.loadLegend { display: flex; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.legendItem { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+.legendDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.zoneList { display: flex; flex-direction: column; gap: 7px; }
+.zoneItem { display: flex; align-items: center; gap: 8px; }
+.zoneName { font-size: 11px; color: var(--text2); width: 50px; flex-shrink: 0; }
+.zoneTrack { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.zoneFill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+.zonePct { font-size: 11px; font-family: var(--mono); color: var(--text2); width: 32px; text-align: right; flex-shrink: 0; }
+
+.activityList { display: flex; flex-direction: column; gap: 8px; }
+.activityRow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg3); border-radius: 10px; border: 1px solid var(--border); }
+.actIcon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.actInfo { flex: 1; min-width: 0; }
+.actName { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.actMeta { font-size: 11px; color: var(--text2); margin-top: 1px; font-family: var(--mono); }
+.actTss { font-family: var(--mono); font-size: 12px; font-weight: 500; text-align: right; flex-shrink: 0; color: var(--text2); }
+
+.liftList { display: flex; flex-direction: column; }
+.liftRow { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.liftRow:last-child { border-bottom: none; }
+.liftName { font-size: 12px; color: var(--text2); }
+.liftRight { display: flex; align-items: baseline; gap: 6px; }
+.liftVal { font-size: 13px; font-weight: 500; font-family: var(--mono); }
+.liftDelta { font-size: 10px; }
+
+.rehabList { display: flex; flex-direction: column; gap: 10px; }
+.rehabItem { display: flex; align-items: center; gap: 8px; }
+.rehabLbl { font-size: 12px; color: var(--text2); width: 130px; flex-shrink: 0; }
+
+.pepList { display: flex; flex-direction: column; }
+.pepRow { display: flex; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pepRow:last-child { border-bottom: none; }
+.pepName { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.pepDetail { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+.addBtn {
+  width: 100%; padding: 10px; border-radius: 10px;
+  background: var(--bg2); border: 1px dashed var(--border2);
+  color: var(--text2); font-size: 13px; cursor: pointer;
+  margin-bottom: 10px; transition: border-color 0.2s, color 0.2s;
+}
+.addBtn:hover { border-color: var(--blue); color: var(--blue); }
+
+.formGrid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.formRow { display: flex; flex-direction: column; gap: 4px; }
+.formRowInline { display: flex; gap: 8px; }
+.formLabel { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.formInput { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; }
+.formInput:focus { border-color: var(--blue); }
+.formSelect { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; }
+.formTextarea { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; min-height: 70px; resize: vertical; }
+
+.saveBtn { width: 100%; padding: 10px; border-radius: 10px; background: var(--blue); border: none; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+.saveBtn:hover { opacity: 0.85; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.microBtn { font-size: 10px; color: var(--text3); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+.microBtn:hover { border-color: var(--border2); color: var(--text2); }
+
+@media (max-width: 480px) {
+  .metricsStrip { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .rehabLbl { width: 100px; font-size: 11px; }
+}
