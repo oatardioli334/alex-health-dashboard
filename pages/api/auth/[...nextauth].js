@@ -10,7 +10,7 @@ export const authOptions = {
         url: "https://cloud.ouraring.com/oauth/authorize",
         params: {
           response_type: "code",
-          scope: "email personal daily heartrate workout tag session spo2 ring_configuration stress",
+          scope: "email personal daily heartrate workout tag session spo2",
         },
       },
       token: "https://api.ouraring.com/oauth/token",
