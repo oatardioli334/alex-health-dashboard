@@ -20,9 +20,9 @@ export const authOptions = {
       checks: ["state"],
       profile(profile) {
         return {
-          id: profile.id || "alex",
-          name: "Alex",
-          email: profile.email,
+          id: profile.id || "oura_user",
+          name: profile.email || "Alex",
+          email: profile.email || null,
         }
       },
     },
@@ -44,6 +44,18 @@ export const authOptions = {
     signIn: "/",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
+  logger: {
+    error(code, metadata) {
+      console.error("[NEXTAUTH ERROR]", code, JSON.stringify(metadata))
+    },
+    warn(code) {
+      console.warn("[NEXTAUTH WARN]", code)
+    },
+    debug(code, metadata) {
+      console.log("[NEXTAUTH DEBUG]", code, JSON.stringify(metadata))
+    },
+  },
 }
 
 export default NextAuth(authOptions)
