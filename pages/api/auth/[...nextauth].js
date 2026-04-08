@@ -6,11 +6,18 @@ export const authOptions = {
       id: "oura",
       name: "Oura",
       type: "oauth",
-      authorization: "https://cloud.ouraring.com/oauth/authorize?response_type=code&scope=email%20personal%20daily%20heartrate%20workout%20tag%20session%20spo2%20ring_configuration%20stress",
+      authorization: {
+        url: "https://cloud.ouraring.com/oauth/authorize",
+        params: {
+          response_type: "code",
+          scope: "email personal daily heartrate workout tag session spo2 ring_configuration stress",
+        },
+      },
       token: "https://api.ouraring.com/oauth/token",
       userinfo: "https://api.ouraring.com/v2/usercollection/personal_info",
       clientId: process.env.OURA_CLIENT_ID,
       clientSecret: process.env.OURA_CLIENT_SECRET,
+      checks: ["state"],
       profile(profile) {
         return {
           id: profile.id || "alex",
