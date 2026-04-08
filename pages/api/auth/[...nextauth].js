@@ -14,9 +14,9 @@ export const authOptions = {
         },
       },
       token: {
-        url: "https://moi.ouraring.com/oauth/v2/oauth-token",
+        url: "https://api.ouraring.com/oauth/token",
         async request({ params, provider }) {
-          const res = await fetch("https://moi.ouraring.com/oauth/v2/oauth-token", {
+          const res = await fetch("https://api.ouraring.com/oauth/token", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
