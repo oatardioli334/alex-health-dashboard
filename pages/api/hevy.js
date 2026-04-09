@@ -8,12 +8,21 @@ async function fetchHevy(path) {
       "Content-Type": "application/json",
     },
   })
-  if (!res.ok) throw new Error(`Hevy API error: ${res.status}`)
+  if (!res.ok) {
+    let body = ""
+    try { body = await res.text() } catch (_) {}
+    throw new Error(`Hevy API error ${res.status}: ${body}`)
+  }
   return res.json()
 }
 
 export default async function handler(req, res) {
   const { endpoint } = req.query
+
+  if (!HEVY_API_KEY) {
+    return res.status(500).json({ error: "HEVY_API_KEY environment variable is not set" })
+  }
+
   try {
     if (endpoint === "workouts") {
       const data = await fetchHevy("/workouts?page=1&pageSize=20")
