@@ -2,6 +2,12 @@ import { useEffect, useState } from "react"
 import { MetricTile, Card, LoadingSpinner, ErrorMsg, SectionNote } from "../components/Components"
 import styles from "./Tabs.module.css"
 
+function fmtDate(iso) {
+  if (!iso) return ""
+  const [y, m, d] = iso.split("-")
+  return `${d}/${m}/${y.slice(2)}`
+}
+
 // Simple sparkline with area fill and avg line
 function SparkLine({ data, color, height = 60 }) {
   if (!data || data.length < 2) return null
@@ -37,8 +43,7 @@ function SparkLine({ data, color, height = 60 }) {
       <text x={w - pad - 2} y={avgY - 4} fontSize="8" fill="rgba(255,255,255,0.3)" textAnchor="end">avg {Math.round(avg)}</text>
       <circle cx={latestX} cy={latestY} r="3" fill={color} />
       <text x={pad} y={height + 14} fontSize="9" fill="#4a5060">{data[0]?.date}</text>
-      <text x={w - pad} y={height + 14} fontSize="9" fill="#4a5060" textAnchor="end">Today</text>
-      <text x={latestX - 6} y={Math.max(14, latestY - 6)} fontSize="10" fill={color} textAnchor="end" fontWeight="500">{Math.round(latest)}</text>
+      <text x={w - pad} y={height + 14} fontSize="9" fill="#4a5060" textAnchor="end">Today</text{fmtDate(data[0]?.date)}={latestX - 6} y={Math.max(14, latestY - 6)} fontSize="10" fill={color} textAnchor="end" fontWeight="500">{Math.round(latest)}</text>
     </svg>
   )
 }
