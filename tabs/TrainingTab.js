@@ -34,7 +34,7 @@ export default function TrainingTab() {
       try {
         const [actRes, fitRes] = await Promise.all([
           fetch("/api/intervals?endpoint=activities"),
-          fetch("/api/intervals?endpoint=fitness"),
+          fetch("/api/intervals?endpoint=wellness"),
         ])
         const actData = await actRes.json()
         const fitData = await fitRes.json()
