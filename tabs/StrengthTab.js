@@ -2,9 +2,104 @@ import { useEffect, useState } from "react"
 import { MetricTile, Card, LoadingSpinner, ErrorMsg, SectionNote } from "../components/Components"
 import styles from "./Tabs.module.css"
 
-function calcE1RM(weight, reps) {
-  if (!weight || !reps) return 0
-  return Math.round(weight * (1 + reps / 30))
+function fmtDate(iso) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })
+}
+
+function fmtSets(sets) {
+  if (!sets || sets.length === 0) return "—"
+  return sets
+    .filter(s => s.weight_kg || s.reps)
+    .map(s => {
+      const w = s.weight_kg ? `${s.weight_kg}kg` : "BW"
+      const r = s.reps ? `×${s.reps}` : ""
+      return `${w}${r}`
+    })
+    .join(" | ")
+}
+
+const CHEST_EXERCISES = [
+  "Incline Bench Press (Dumbbell)",
+  "Cable Fly Crossovers",
+  "Chest Press (Machine)",
+  "Pullover (Machine)",
+  "Incline Chest Fly (Dumbbell)",
+  "Incline Chest Press (Machine)",
+  "Chest Fly (Machine)",
+  "Decline Bench Press (Machine)",
+]
+
+const BACK_EXERCISES = [
+  "Chest Supported Dumbell Row",
+  "Iso-Lateral Row (Machine)",
+  "Single Arm Cable Row",
+  "Deadlift (Trap bar)",
+  "Lat Pulldown - Close Grip (Cable)",
+  "Iso-Lateral Low Row",
+  "Back Deltoids",
+  "Rear Delt Reverse Fly (Machine)",
+]
+
+function MuscleGroupCard({ title, exercises, workouts, color }) {
+  // Find most recent workout containing any exercise from this group
+  const lastSession = workouts
+    .map(w => {
+      const matches = (w.exercises || []).filter(e => exercises.includes(e.title))
+      return { workout: w, matches, date: w.start_time || w.created_at }
+    })
+    .filter(x => x.matches.length > 0)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+
+  if (!lastSession) {
+    return (
+      <Card title={title}>
+        <SectionNote>No sessions logged yet.</SectionNote>
+      </Card>
+    )
+  }
+
+  const sessionDate = fmtDate(lastSession.date)
+  // Show exercises in the defined order, only those that appear in the session
+  const sessionExercises = exercises
+    .map(name => lastSession.matches.find(e => e.title === name))
+    .filter(Boolean)
+
+  return (
+    <Card title={`${title} — ${sessionDate}`}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {sessionExercises.map(ex => {
+          const validSets = (ex.sets || []).filter(s => s.weight_kg || s.reps)
+          return (
+            <div key={ex.title}>
+              <div style={{ fontSize: "12px", fontWeight: 600, color: color, marginBottom: 5 }}>
+                {ex.title}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {validSets.map((s, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      fontSize: "9px", color: "var(--text2)", width: 28, flexShrink: 0
+                    }}>
+                      Set {i + 1}
+                    </div>
+                    <div style={{
+                      fontSize: "11px", color: "var(--text1)",
+                      background: "var(--bg3)", borderRadius: 4,
+                      padding: "2px 8px"
+                    }}>
+                      {s.weight_kg ? `${s.weight_kg}kg` : "BW"} × {s.reps || "—"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </Card>
+  )
 }
 
 export default function StrengthTab() {
@@ -29,47 +124,19 @@ export default function StrengthTab() {
   }, [])
 
   if (loading) return <LoadingSpinner />
-  if (error) return <ErrorMsg msg={`Hevy connection issue: ${error}`} />
+  if (error) return <ErrorMsg msg={`Hevy error: ${error}`} />
 
   const allWorkouts = workouts || []
+
+  const now = new Date()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))
+  weekStart.setHours(0, 0, 0, 0)
+
   const thisWeek = allWorkouts.filter(w => {
-    const d = new Date(w.start_time * 1000 || w.created_at)
-    return (Date.now() - d) / (1000 * 60 * 60 * 24) <= 7
+    const d = new Date(w.start_time || w.created_at)
+    return d >= weekStart
   })
-
-  const exerciseMap = {}
-  allWorkouts.forEach(w => {
-    const exercises = w.exercises || []
-    exercises.forEach(ex => {
-      const name = ex.title || ex.exercise_template_id
-      if (!exerciseMap[name]) exerciseMap[name] = []
-      const sets = ex.sets || []
-      sets.forEach(s => {
-        if (s.weight_kg && s.reps) {
-          exerciseMap[name].push({
-            date: w.start_time ? new Date(w.start_time * 1000) : new Date(w.created_at),
-            weight: s.weight_kg,
-            reps: s.reps,
-            e1rm: calcE1RM(s.weight_kg, s.reps)
-          })
-        }
-      })
-    })
-  })
-
-  const keyLifts = Object.entries(exerciseMap)
-    .filter(([_, sets]) => sets.length >= 2)
-    .map(([name, sets]) => {
-      const sorted = [...sets].sort((a, b) => b.date - a.date)
-      const recent = sorted[0]
-      const prev = sorted.find(s => s.date < recent.date)
-      const delta = prev ? recent.e1rm - prev.e1rm : null
-      return { name, recent, delta, count: sets.length }
-    })
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8)
-
-  const recentWorkouts = allWorkouts.slice(0, 4)
 
   return (
     <div>
@@ -78,61 +145,19 @@ export default function StrengthTab() {
         <MetricTile label="Total logged" value={allWorkouts.length} sub="all time" subType="flat" accentColor="blue" />
       </div>
 
-      {keyLifts.length > 0 && (
-        <Card title="Key lifts — estimated 1RM trend">
-          <div className={styles.liftList}>
-            {keyLifts.map(lift => (
-              <div key={lift.name} className={styles.liftRow}>
-                <span className={styles.liftName}>{lift.name}</span>
-                <div className={styles.liftRight}>
-                  <span className={styles.liftVal}>{lift.recent.weight}kg</span>
-                  {lift.delta !== null && (
-                    <span className={`${styles.liftDelta} ${lift.delta > 0 ? styles.up : lift.delta < 0 ? styles.down : styles.flat}`}>
-                      {lift.delta > 0 ? `+${lift.delta}` : lift.delta < 0 ? lift.delta : "—"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <SectionNote>Deltas show estimated 1RM change vs previous recorded session for each lift.</SectionNote>
-        </Card>
-      )}
+      <MuscleGroupCard
+        title="Chest"
+        exercises={CHEST_EXERCISES}
+        workouts={allWorkouts}
+        color="var(--amber)"
+      />
 
-      {recentWorkouts.length > 0 && (
-        <Card title="Recent sessions">
-          <div className={styles.activityList}>
-            {recentWorkouts.map((w, i) => {
-              const date = w.start_time ? new Date(w.start_time * 1000) : new Date(w.created_at)
-              const exercises = w.exercises || []
-              const totalSets = exercises.reduce((s, e) => s + (e.sets?.length || 0), 0)
-              const dur = w.duration ? Math.round(w.duration / 60) : null
-              return (
-                <div key={i} className={styles.activityRow}>
-                  <div className={styles.actIcon} style={{ background: "var(--green-dim)" }}>🏋️</div>
-                  <div className={styles.actInfo}>
-                    <div className={styles.actName}>{w.title || w.name || "Strength session"}</div>
-                    <div className={styles.actMeta}>
-                      {date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
-                      {totalSets > 0 ? ` · ${totalSets} sets` : ""}
-                      {dur ? ` · ${dur}m` : ""}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--text3)", fontFamily: "var(--mono)" }}>
-                    {exercises.length} ex
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-      )}
-
-      {allWorkouts.length === 0 && (
-        <div style={{ color: "var(--text3)", fontSize: 13, padding: "20px 0", textAlign: "center" }}>
-          No workouts found. Make sure your Hevy API key is active and you have logged sessions.
-        </div>
-      )}
+      <MuscleGroupCard
+        title="Back"
+        exercises={BACK_EXERCISES}
+        workouts={allWorkouts}
+        color="var(--blue)"
+      />
     </div>
   )
 }
