@@ -145,19 +145,24 @@ export default function StrengthTab() {
         <MetricTile label="Total logged" value={allWorkouts.length} sub="all time" subType="flat" accentColor="blue" />
       </div>
 
-      <MuscleGroupCard
-        title="Chest"
-        exercises={CHEST_EXERCISES}
-        workouts={allWorkouts}
-        color="var(--amber)"
-      />
-
-      <MuscleGroupCard
-        title="Back"
-        exercises={BACK_EXERCISES}
-        workouts={allWorkouts}
-        color="var(--blue)"
-      />
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <MuscleGroupCard
+            title="Chest"
+            exercises={CHEST_EXERCISES}
+            workouts={allWorkouts}
+            color="var(--amber)"
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <MuscleGroupCard
+            title="Back"
+            exercises={BACK_EXERCISES}
+            workouts={allWorkouts}
+            color="var(--blue)"
+          />
+        </div>
+      </div>
     </div>
   )
 }
