@@ -1,0 +1,55 @@
+{
+  "sessions": [
+    {
+      "date": "2026-04-13",
+      "name": "ARO Strength 1",
+      "exercises": [
+        { "label": "🔥", "name": "Warm up" },
+        { "label": "A", "name": "Readiness to Train Score" },
+        { "label": "B", "name": "Note on logging weight, reps, sets" },
+        { "label": "C", "name": "Stability ball isometric knee extension" },
+        { "label": "D", "name": "Pogos Linear" },
+        { "label": "E", "name": "Single Leg Broad Jump - 2 Leg Landing" },
+        { "label": "F", "name": "Skater Hops" },
+        { "label": "G", "name": "Crossover Hop & Stick" },
+        { "label": "H", "name": "Wall Ball" },
+        { "label": "I", "name": "Barbell split squat" },
+        { "label": "J1", "name": "Seated Leg Curl Single Leg" },
+        { "label": "J2", "name": "Leg Extension Single Leg" },
+        { "label": "K", "name": "How hard was that session? Any issues?" }
+      ]
+    },
+    {
+      "date": "2026-04-15",
+      "name": "ARO Strength 2",
+      "exercises": [
+        { "label": "🔥", "name": "Warm up" },
+        { "label": "A", "name": "Readiness to Train Score" },
+        { "label": "B", "name": "Single leg pogo - TM" },
+        { "label": "C", "name": "Single leg forward hop and stick" },
+        { "label": "D", "name": "Box to box jump" },
+        { "label": "E", "name": "Bulgarian Split squat BB" },
+        { "label": "F", "name": "Leg Extension Single Leg" },
+        { "label": "G", "name": "How hard was that session? Any issues?" }
+      ]
+    },
+    {
+      "date": "2026-04-17",
+      "name": "ARO Strength 3",
+      "exercises": [
+        { "label": "🔥", "name": "Warm up" },
+        { "label": "A", "name": "Readiness to Train Score" },
+        { "label": "B", "name": "Single leg altitude landing" },
+        { "label": "C", "name": "DB drop split catch (new)" },
+        { "label": "D", "name": "Split Squat Jump with Pause" },
+        { "label": "E", "name": "Wall Drill Double Switch" },
+        { "label": "F", "name": "CMJ Single Leg to Double Leg Landing" },
+        { "label": "G", "name": "Box Squat" },
+        { "label": "H1", "name": "Eccentric single leg leg extension" },
+        { "label": "H2", "name": "single leg hamstring curl" },
+        { "label": "I", "name": "Smith machine single leg calf raise" },
+        { "label": "J", "name": "How hard was that session? Any issues?" }
+      ]
+    }
+  ]
+}
