@@ -1,141 +1,109 @@
-import { useEffect, useState } from "react"
-import { Card, NRSBar, SectionNote, LoadingSpinner } from "../components/Components"
-import styles from "./Tabs.module.css"
-
-const FIELDS = [
-  { key: "painRest", label: "Pain at rest (NRS 0–10)" },
-  { key: "painLoad", label: "Pain during load (NRS 0–10)" },
-  { key: "painAfter", label: "Pain post-session (NRS 0–10)" },
-  { key: "swelling", label: "Swelling (0–10)" },
-  { key: "function", label: "Function score (0–10)" },
-]
+import { useState, useEffect } from 'react'
 
 export default function RehabTab() {
-  const [entries, setEntries] = useState([])
+  const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ date: new Date().toISOString().split("T")[0], painRest: 0, painLoad: 0, painAfter: 0, swelling: 0, function: 5, sessions: 0, plannedSessions: 3, notes: "" })
-  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch("/api/manual?type=rehab")
+    fetch('/rehab-schedule.json')
       .then(r => r.json())
-      .then(d => setEntries(d || []))
-      .finally(() => setLoading(false))
+      .then(data => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const upcoming = (data.sessions || [])
+          .filter(s => new Date(s.date + 'T00:00:00') >= today)
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+        setSessions(upcoming)
+        setLoading(false)
+      })
+      .catch(err => {
+        setError(err.message)
+        setLoading(false)
+      })
   }, [])
 
-  async function save() {
-    setSaving(true)
-    const res = await fetch("/api/manual?type=rehab", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) })
-    const entry = await res.json()
-    setEntries(prev => [entry, ...prev])
-    setShowForm(false)
-    setSaving(false)
+  function fmtDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
   }
 
-  const latest = entries[0]
-  const trend = entries.slice(0, 8).reverse()
-
-  const w = 320
-  const h = 60
-
-  function trendLine(key, color) {
-    const vals = trend.map(e => Number(e[key]) || 0)
-    if (vals.length < 2) return null
-    const max = Math.max(...vals, 1)
-    const points = vals.map((v, i) => {
-      const x = Math.round(4 + (i / (vals.length - 1)) * (w - 8))
-      const y = Math.round(h - 4 - (v / max) * (h - 8))
-      return `${x},${y}`
-    }).join(" ")
-    return <polyline key={key} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
+  function isToday(dateStr) {
+    const today = new Date()
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
   }
+
+  function isNext(index) {
+    return index === 0
+  }
+
+  if (loading) return (
+    <div style={{ padding: 32, color: '#6b7280' }}>Loading rehab schedule...</div>
+  )
+
+  if (error) return (
+    <div style={{ padding: 32, color: '#ef4444' }}>Error: {error}</div>
+  )
+
+  if (sessions.length === 0) return (
+    <div style={{ padding: 32 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Rehab Programme</h2>
+      <p style={{ color: '#6b7280' }}>No upcoming sessions scheduled. Upload your next week's programme to add sessions.</p>
+    </div>
+  )
 
   return (
-    <div>
-      <div className={styles.metricsStrip} style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
-        <div className={styles.metricTileSimple}>
-          <div className={styles.metricLabel}>Sessions this week</div>
-          <div className={styles.metricValue}>{latest?.sessions ?? "—"}<span style={{ fontSize: 14, color: "var(--text3)" }}>/{latest?.plannedSessions ?? 3}</span></div>
-        </div>
-        <div className={styles.metricTileSimple}>
-          <div className={styles.metricLabel}>Pain (load)</div>
-          <div className={styles.metricValue} style={{ color: latest?.painLoad <= 3 ? "var(--green)" : latest?.painLoad <= 6 ? "var(--amber)" : "var(--red)" }}>
-            {latest?.painLoad ?? "—"}<span style={{ fontSize: 14, color: "var(--text3)" }}>/10</span>
-          </div>
-        </div>
-      </div>
-
-      {latest && (
-        <Card title="Latest entry">
-          <div className={styles.rehabList}>
-            {FIELDS.map(f => (
-              <div key={f.key} className={styles.rehabItem}>
-                <span className={styles.rehabLbl}>{f.label.replace(" (NRS 0–10)", "").replace(" (0–10)", "")}</span>
-                <NRSBar value={Number(latest[f.key]) || 0} max={10} />
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 20 }}>Rehab Programme</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {sessions.map((session, idx) => (
+          <div key={session.date} style={{
+            background: isNext(idx) ? '#f0fdf4' : '#ffffff',
+            border: isNext(idx) ? '2px solid #22c55e' : '1px solid #e5e7eb',
+            borderRadius: 12,
+            padding: 20,
+            boxShadow: isNext(idx) ? '0 2px 8px rgba(34,197,94,0.15)' : '0 1px 3px rgba(0,0,0,0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              {isNext(idx) && (
+                <span style={{
+                  background: '#22c55e', color: '#fff', fontSize: 11, fontWeight: 700,
+                  padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em', textTransform: 'uppercase'
+                }}>Next</span>
+              )}
+              {isToday(session.date) && (
+                <span style={{
+                  background: '#3b82f6', color: '#fff', fontSize: 11, fontWeight: 700,
+                  padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em', textTransform: 'uppercase'
+                }}>Today</span>
+              )}
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>{session.name}</div>
+                <div style={{ fontSize: 13, color: '#6b7280' }}>{fmtDate(session.date)}</div>
               </div>
-            ))}
-          </div>
-          {latest.notes && <SectionNote>{latest.notes}</SectionNote>}
-          <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 8 }}>{latest.date}</div>
-        </Card>
-      )}
-
-      {trend.length >= 2 && (
-        <Card title="8-week trend">
-          <div className={styles.loadLegend}>
-            <span className={styles.legendItem}><span className={styles.legendDot} style={{ background: "#ff5e5e" }} />Pain (load)</span>
-            <span className={styles.legendItem}><span className={styles.legendDot} style={{ background: "#3ecf8e" }} />Function</span>
-          </div>
-          <svg width="100%" viewBox={`0 0 ${w} ${h + 14}`} style={{ overflow: "visible" }}>
-            {trendLine("painLoad", "#ff5e5e")}
-            {trendLine("function", "#3ecf8e")}
-            <text x="4" y={h + 12} fontSize="9" fill="#4a5060">{trend[0]?.date}</text>
-            <text x={w - 4} y={h + 12} fontSize="9" fill="#4a5060" textAnchor="end">{trend[trend.length - 1]?.date}</text>
-          </svg>
-        </Card>
-      )}
-
-      <button className={styles.addBtn} onClick={() => setShowForm(!showForm)}>
-        {showForm ? "Cancel" : "+ Log rehab session"}
-      </button>
-
-      {showForm && (
-        <Card title="New rehab entry">
-          <div className={styles.formGrid}>
-            <div className={styles.formRow}>
-              <label className={styles.formLabel}>Date</label>
-              <input type="date" className={styles.formInput} value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
             </div>
-            {FIELDS.map(f => (
-              <div key={f.key} className={styles.formRow}>
-                <label className={styles.formLabel}>{f.label}</label>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input type="range" min="0" max="10" step="1" value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: Number(e.target.value) }))} style={{ flex: 1 }} />
-                  <span style={{ fontFamily: "var(--mono)", fontSize: 13, width: 20, textAlign: "right" }}>{form[f.key]}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {session.exercises.map((ex, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                  padding: '6px 10px', borderRadius: 8,
+                  background: ex.label === '🔥' ? 'rgba(251,191,36,0.08)' : 'rgba(0,0,0,0.02)'
+                }}>
+                  <span style={{
+                    minWidth: 28, fontSize: 13, fontWeight: 700,
+                    color: ex.label === '🔥' ? '#f59e0b' : '#6366f1',
+                    paddingTop: 1
+                  }}>{ex.label}</span>
+                  <span style={{ fontSize: 14, color: '#374151' }}>{ex.name}</span>
                 </div>
-              </div>
-            ))}
-            <div className={styles.formRow}>
-              <label className={styles.formLabel}>Sessions done</label>
-              <input type="number" className={styles.formInput} min="0" max="7" value={form.sessions} onChange={e => setForm(p => ({ ...p, sessions: Number(e.target.value) }))} />
-            </div>
-            <div className={styles.formRow}>
-              <label className={styles.formLabel}>Notes</label>
-              <textarea className={styles.formTextarea} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Any observations..." />
+              ))}
             </div>
           </div>
-          <button className={styles.saveBtn} onClick={save} disabled={saving}>
-            {saving ? "Saving..." : "Save entry"}
-          </button>
-        </Card>
-      )}
-
-      {entries.length === 0 && !showForm && (
-        <div style={{ color: "var(--text3)", fontSize: 13, padding: "20px 0", textAlign: "center" }}>
-          No rehab entries yet. Log your first session above.
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   )
 }
