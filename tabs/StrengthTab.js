@@ -129,19 +129,19 @@ export default function StrengthTab() {
   const allWorkouts = workouts || []
 
   const now = new Date()
-  const weekStart = new Date(now)
-  weekStart.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))
-  weekStart.setHours(0, 0, 0, 0)
+  const sevenDaysAgo = new Date(now)
+  sevenDaysAgo.setDate(now.getDate() - 7)
+  sevenDaysAgo.setHours(0, 0, 0, 0)
 
   const thisWeek = allWorkouts.filter(w => {
     const d = new Date(w.start_time || w.created_at)
-    return d >= weekStart
+    return d >= sevenDaysAgo
   })
 
   return (
     <div>
       <div className={styles.metricsStrip} style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
-        <MetricTile label="Sessions this week" value={thisWeek.length} sub="workouts logged" subType="flat" accentColor="green" />
+        <MetricTile label="Sessions (last 7 days)" value={thisWeek.length} sub="workouts logged" subType="flat" accentColor="green" />
         <MetricTile label="Total logged" value={allWorkouts.length} sub="all time" subType="flat" accentColor="blue" />
       </div>
 
