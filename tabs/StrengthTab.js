@@ -43,14 +43,19 @@ const BACK_EXERCISES = [
 ]
 
 const LEGS_EXERCISES = [
-  "Barbell Squat",
-  "Leg Extension",
-  "Leg Extension Single Leg",
-  "Leg Curl",
-  "Leg Curl (Machine)",
-  "Seated Leg Curl Single Leg",
-  "Smith Machine Calf Raise",
-  "Standing Calf Raise (Smith Machine)",
+  "Bulgarian Split Squat",
+  "Bulgarian Split squat",
+  "Leg Extension (Machine)",
+  "Single Leg Extensions",
+  "Single Leg Knee Extension",
+  "Lying Leg Curl (Machine)",
+  "Seated Leg Curl (Machine)",
+  "Single Leg Hamstring Curl",
+  "Leg Press (Machine)",
+  "Single Leg Press",
+  "Smith Machine Single Leg Calf Raise",
+  "Standing Calf Raise (Smith)",
+  "Seated Calf Raise",
 ]
 
 function MuscleGroupCard({ title, exercises, workouts, color }) {
