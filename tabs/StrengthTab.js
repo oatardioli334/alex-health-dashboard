@@ -42,6 +42,17 @@ const BACK_EXERCISES = [
   "Rear Delt Reverse Fly (Machine)",
 ]
 
+const LEGS_EXERCISES = [
+  "Barbell Squat",
+  "Leg Extension",
+  "Leg Extension Single Leg",
+  "Leg Curl",
+  "Leg Curl (Machine)",
+  "Seated Leg Curl Single Leg",
+  "Smith Machine Calf Raise",
+  "Standing Calf Raise (Smith Machine)",
+]
+
 function MuscleGroupCard({ title, exercises, workouts, color }) {
   // Find most recent workout containing any exercise from this group
   const lastSession = workouts
@@ -160,6 +171,14 @@ export default function StrengthTab() {
             exercises={BACK_EXERCISES}
             workouts={allWorkouts}
             color="var(--blue)"
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <MuscleGroupCard
+            title="Legs"
+            exercises={LEGS_EXERCISES}
+            workouts={allWorkouts}
+            color="var(--green)"
           />
         </div>
       </div>
